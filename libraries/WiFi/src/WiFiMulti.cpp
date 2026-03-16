@@ -218,7 +218,7 @@ uint8_t WiFiMulti::run(uint32_t connectTimeout, bool scanHidden) {
         }
 
         if (hidden_scan) {
-          log_v("hidden ssid on channel %d found, trying to connect with known credentials...", chan_scan);
+          log_v("hidden ssid on channel %" PRIi32 " found, trying to connect with known credentials...", chan_scan);
         }
 
         bool known = false;
@@ -260,14 +260,14 @@ uint8_t WiFiMulti::run(uint32_t connectTimeout, bool scanHidden) {
                 }
               }
               known = true;
-              log_v("rssi_scan: %d, bestNetworkDb: %d", rssi_scan, bestNetworkDb);
-              if (rssi_scan > bestNetworkDb) {                                            // best network
+              log_v("rssi_scan: %" PRIi32 ", bestNetworkDb: %d", rssi_scan, bestNetworkDb);
+              if (rssi_scan > bestNetworkDb) {                         // best network
 #if CONFIG_ESP_WIFI_ENTERPRISE_SUPPORT
-                if ( sec_scan == WIFI_AUTH_OPEN ||
-                     ((sec_scan != WIFI_AUTH_WPA2_ENTERPRISE) && entry.passphrase) ||
-                     ((sec_scan == WIFI_AUTH_WPA2_ENTERPRISE) && entry.passphrase && entry.username && entry.identity ) ) {
+                if (sec_scan == WIFI_AUTH_OPEN ||
+                    ((sec_scan != WIFI_AUTH_WPA2_ENTERPRISE) && entry.passphrase) ||
+                    ((sec_scan == WIFI_AUTH_WPA2_ENTERPRISE) && entry.passphrase && entry.username && entry.identity)) {
 #else
-                if ( sec_scan == WIFI_AUTH_OPEN || entry.passphrase ) {  // check for passphrase if not open wlan
+                if (sec_scan == WIFI_AUTH_OPEN || entry.passphrase) {  // check for passphrase if not open wlan
 #endif
                   log_v("best network is now: %s", ssid_scan);
                   bestIndex = x;
@@ -289,13 +289,15 @@ uint8_t WiFiMulti::run(uint32_t connectTimeout, bool scanHidden) {
 
         if (known) {
           log_d(
-            " --->   %d: [%d][%02X:%02X:%02X:%02X:%02X:%02X] %s (%d) (%c) (%s)", i, chan_scan, BSSID_scan[0], BSSID_scan[1], BSSID_scan[2], BSSID_scan[3],
-            BSSID_scan[4], BSSID_scan[5], ssid_scan.c_str(), rssi_scan, (sec_scan == WIFI_AUTH_OPEN) ? ' ' : '*', (hidden_scan) ? "hidden" : "visible"
+            " --->   %d: [%" PRIi32 "][%02X:%02X:%02X:%02X:%02X:%02X] %s (%" PRIi32 ") (%c) (%s)", i, chan_scan, BSSID_scan[0], BSSID_scan[1], BSSID_scan[2],
+            BSSID_scan[3], BSSID_scan[4], BSSID_scan[5], ssid_scan.c_str(), rssi_scan, (sec_scan == WIFI_AUTH_OPEN) ? ' ' : '*',
+            (hidden_scan) ? "hidden" : "visible"
           );
         } else {
           log_d(
-            "        %d: [%d][%02X:%02X:%02X:%02X:%02X:%02X] %s (%d) (%c) (%s)", i, chan_scan, BSSID_scan[0], BSSID_scan[1], BSSID_scan[2], BSSID_scan[3],
-            BSSID_scan[4], BSSID_scan[5], ssid_scan.c_str(), rssi_scan, (sec_scan == WIFI_AUTH_OPEN) ? ' ' : '*', (hidden_scan) ? "hidden" : "visible"
+            "        %d: [%" PRIi32 "][%02X:%02X:%02X:%02X:%02X:%02X] %s (%" PRIi32 ") (%c) (%s)", i, chan_scan, BSSID_scan[0], BSSID_scan[1], BSSID_scan[2],
+            BSSID_scan[3], BSSID_scan[4], BSSID_scan[5], ssid_scan.c_str(), rssi_scan, (sec_scan == WIFI_AUTH_OPEN) ? ' ' : '*',
+            (hidden_scan) ? "hidden" : "visible"
           );
         }
       }
@@ -310,7 +312,7 @@ uint8_t WiFiMulti::run(uint32_t connectTimeout, bool scanHidden) {
 
     if (bestIndex >= 0) {
       log_i(
-        "[WIFI] Connecting BSSID: %02X:%02X:%02X:%02X:%02X:%02X SSID: %s Channel: %d (%d)", bestBSSID[0], bestBSSID[1], bestBSSID[2], bestBSSID[3],
+        "[WIFI] Connecting BSSID: %02X:%02X:%02X:%02X:%02X:%02X SSID: %s Channel: %" PRIi32 " (%d)", bestBSSID[0], bestBSSID[1], bestBSSID[2], bestBSSID[3],
         bestBSSID[4], bestBSSID[5], bestNetwork.ssid, bestChannel, bestNetworkDb
       );
 
@@ -321,15 +323,14 @@ uint8_t WiFiMulti::run(uint32_t connectTimeout, bool scanHidden) {
 #endif
       WiFi.disconnect();
       delay(10);
-
 #if CONFIG_ESP_WIFI_ENTERPRISE_SUPPORT
       if (bestNetworkSec != WIFI_AUTH_WPA2_ENTERPRISE) {
-        WiFi.begin(bestNetwork.ssid, (_bAllowOpenAP && bestNetworkSec == WIFI_AUTH_OPEN) ? NULL : bestNetwork.passphrase, bestChannel, bestBSSID);
+        WiFi.begin(bestNetwork.ssid, (bestNetworkSec == WIFI_AUTH_OPEN) ? NULL : bestNetwork.passphrase, bestChannel, bestBSSID);
       } else {
         WiFi.begin(bestNetwork.ssid, WPA2_AUTH_PEAP, bestNetwork.identity, bestNetwork.username, bestNetwork.passphrase, NULL, NULL, NULL, -1, bestChannel, bestBSSID);
       }
 #else
-      WiFi.begin(bestNetwork.ssid, (_bAllowOpenAP && bestNetworkSec == WIFI_AUTH_OPEN) ? NULL : bestNetwork.passphrase, bestChannel, bestBSSID);
+      WiFi.begin(bestNetwork.ssid, (bestNetworkSec == WIFI_AUTH_OPEN) ? NULL : bestNetwork.passphrase, bestChannel, bestBSSID);
 #endif /* CONFIG_ESP_WIFI_ENTERPRISE_SUPPORT */
       status = WiFi.status();
       _bWFMInit = true;
@@ -347,7 +348,7 @@ uint8_t WiFiMulti::run(uint32_t connectTimeout, bool scanHidden) {
           log_d("[WIFI] SSID: %s", WiFi.SSID().c_str());
           log_d("[WIFI] IP: %s", WiFi.localIP().toString().c_str());
           log_d("[WIFI] MAC: %s", WiFi.BSSIDstr().c_str());
-          log_d("[WIFI] Channel: %d", WiFi.channel());
+          log_d("[WIFI] Channel: %" PRIi32, WiFi.channel());
 
           if (_connectionTestCBFunc != NULL) {
             // We connected to an AP but if it's a captive portal we're not going anywhere.  Test it.
