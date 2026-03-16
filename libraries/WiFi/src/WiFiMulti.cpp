@@ -206,7 +206,7 @@ uint8_t WiFiMulti::run(uint32_t connectTimeout, bool scanHidden) {
               }
               known = true;
               log_v("rssi_scan: %d, bestNetworkDb: %d", rssi_scan, bestNetworkDb);
-              if (rssi_scan > bestNetworkDb) {                                            // best network
+              if (rssi_scan > bestNetworkDb) {                         // best network
                 if (sec_scan == WIFI_AUTH_OPEN || entry.passphrase) {  // check for passphrase if not open wlan
                   log_v("best network is now: %s", ssid_scan);
                   bestIndex = x;
