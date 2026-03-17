@@ -114,20 +114,26 @@ bool WiFiMulti::addAP(const char *ssid, const char *passphrase) {
     if (!newAP.username) {
       log_e("[WIFI][APlistAdd] fail newAP.username == 0");
       free(newAP.ssid);
-      if (newAP.passphrase) free(newAP.passphrase);
+      if (newAP.passphrase) {
+        free(newAP.passphrase);
+      }
       return false;
     }
   } else {
     newAP.username = NULL;
   }
 
-  if (identity) { // Allow empty identity as not all WPA2-Enterprise networks require it
+  if (identity) {  // Allow empty identity as not all WPA2-Enterprise networks require it
     newAP.identity = strdup(identity);
     if (!newAP.identity) {
       log_e("[WIFI][APlistAdd] fail newAP.identity == 0");
       free(newAP.ssid);
-      if (newAP.passphrase) free(newAP.passphrase);
-      if (newAP.username) free(newAP.username);
+      if (newAP.passphrase) {
+        free(newAP.passphrase);
+      }
+      if (newAP.username) {
+        free(newAP.username);
+      }
       return false;
     }
   } else {
@@ -264,11 +270,10 @@ uint8_t WiFiMulti::run(uint32_t connectTimeout, bool scanHidden) {
               }
               known = true;
               log_v("rssi_scan: %" PRIi32 ", bestNetworkDb: %d", rssi_scan, bestNetworkDb);
-              if (rssi_scan > bestNetworkDb) {                         // best network
+              if (rssi_scan > bestNetworkDb) {  // best network
 #if CONFIG_ESP_WIFI_ENTERPRISE_SUPPORT
-                if (sec_scan == WIFI_AUTH_OPEN ||
-                    ((sec_scan != WIFI_AUTH_WPA2_ENTERPRISE) && entry.passphrase) ||
-                    ((sec_scan == WIFI_AUTH_WPA2_ENTERPRISE) && entry.passphrase && entry.username && entry.identity)) {
+                if (sec_scan == WIFI_AUTH_OPEN || ((sec_scan != WIFI_AUTH_WPA2_ENTERPRISE) && entry.passphrase)
+                    || ((sec_scan == WIFI_AUTH_WPA2_ENTERPRISE) && entry.passphrase && entry.username && entry.identity)) {
 #else
                 if (sec_scan == WIFI_AUTH_OPEN || entry.passphrase) {  // check for passphrase if not open wlan
 #endif
@@ -330,7 +335,9 @@ uint8_t WiFiMulti::run(uint32_t connectTimeout, bool scanHidden) {
       if (bestNetworkSec != WIFI_AUTH_WPA2_ENTERPRISE) {
         WiFi.begin(bestNetwork.ssid, (bestNetworkSec == WIFI_AUTH_OPEN) ? NULL : bestNetwork.passphrase, bestChannel, bestBSSID);
       } else {
-        WiFi.begin(bestNetwork.ssid, WPA2_AUTH_PEAP, bestNetwork.identity, bestNetwork.username, bestNetwork.passphrase, NULL, NULL, NULL, -1, bestChannel, bestBSSID);
+        WiFi.begin(
+          bestNetwork.ssid, WPA2_AUTH_PEAP, bestNetwork.identity, bestNetwork.username, bestNetwork.passphrase, NULL, NULL, NULL, -1, bestChannel, bestBSSID
+        );
       }
 #else
       WiFi.begin(bestNetwork.ssid, (bestNetworkSec == WIFI_AUTH_OPEN) ? NULL : bestNetwork.passphrase, bestChannel, bestBSSID);
