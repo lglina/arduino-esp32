@@ -114,6 +114,7 @@ bool WiFiMulti::addAP(const char *ssid, const char *passphrase) {
     if (!newAP.username) {
       log_e("[WIFI][APlistAdd] fail newAP.username == 0");
       free(newAP.ssid);
+      if (newAP.passphrase) free(newAP.passphrase);
       return false;
     }
   } else {
@@ -125,6 +126,8 @@ bool WiFiMulti::addAP(const char *ssid, const char *passphrase) {
     if (!newAP.identity) {
       log_e("[WIFI][APlistAdd] fail newAP.identity == 0");
       free(newAP.ssid);
+      if (newAP.passphrase) free(newAP.passphrase);
+      if (newAP.username) free(newAP.username);
       return false;
     }
   } else {
